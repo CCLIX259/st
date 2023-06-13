@@ -1,0 +1,6 @@
+aiofile==3.8.5
+aiogram==2.25.1
+Pyrogram==2.0.106
+requests==2.31.0
+openai==0.27.7
+emoji
