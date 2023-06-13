@@ -9,7 +9,6 @@ from requests import get
 from requests.exceptions import ConnectionError
 from aiofile import async_open
 
-
 API_ID = 19309010
 API_HASH = "dfdf154157cca400bd53b00100468fa5"
 
@@ -47,30 +46,31 @@ async def joined_channels(path_, channels, proxy, api_id, api_hash):
     config = configparser.ConfigParser()
     config.read('./config/main.ini')
     bot = Bot(config['SETTINGS']['token'])
-    text = ''
     async with app:
         me = await app.get_me()
         try:
             for channel in channels:
                 chat = await app.get_chat(channel)
                 await app.join_chat(chat.id)
-                text += f"@{me.username}: присоединился к @{channel}\n"
+                await bot.send_message(int(path_.split('/')[2]), f"@{me.username}: присоединился к @{channel}\n")
                 await asyncio.sleep(120)
         except FloodWait:
-            text += f"@{me.username}: не присоединился к @{channel} из-за antiflud системы\n"
+            await bot.send_message(int(path_.split('/')[2]), f"@{me.username}: "
+                                                             f"не присоединился к @{channel} из-за antiflud системы\n")
             print('antiflood')
             await asyncio.sleep(300)
         except sqlite3.OperationalError:
-            text += f"@{me.username}: не присоединился к @{channel} из-за того, " \
-                    f"что сессия открыта в другом файле\n"
+            await bot.send_message(int(path_.split('/')[2]),
+                                   f"@{me.username}: не присоединился к @{channel} из-за того, что сессия"
+                                   f" открыта в другом файле\n")
             print('сессия занята')
         except AuthKeyDuplicated:
             print('сессия умерла')
             return await bot.send_message(int(path_.split('/')[2]), f"У вас умерла сессия @{me.username}")
         except Exception as e:
             print(e)
-            text += f"@{me.username}: не присоединился из-за {e}!"
-    await bot.send_message(int(path_.split('/')[2]), text)
+            await bot.send_message(int(path_.split('/')[2]),
+                                   f"@{me.username}: не присоединился из-за {e}!")
 
 
 async def set_photo(name_session, path_):
